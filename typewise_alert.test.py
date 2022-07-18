@@ -19,20 +19,31 @@ class TypewiseTest(unittest.TestCase):
     self.assertTrue(typewise_alert.classify_temperature_breach("MED_ACTIVE_COOLING", 35) == 'NORMAL')
     self.assertTrue(typewise_alert.classify_temperature_breach("MED_ACTIVE_COOLING", 55) == 'TOO_HIGH')
 
-  # def test_check_and_alert(self):
-  #   self.assertTrue(typewise_alert.check_and_alert("TO_CONTROLLER", "PASSIVE_COOLING", -10) == '65261, TOO_LOW')
-    # print(typewise_alert.check_and_alert("TO_CONTROLLER", "PASSIVE_COOLING", -10))
+
+  def test_check_and_alert(self):
+    breachType, message = typewise_alert.check_and_alert('TO_CONTROLLER', "PASSIVE_COOLING", 45)
+    self.assertTrue(breachType == "TOO_HIGH")
+    self.assertTrue(message == "0xfeed, TOO_HIGH")
+    
+    breachType, message = typewise_alert.check_and_alert('TO_EMAIL', "PASSIVE_COOLING", -5)    
+    self.assertTrue(breachType == "TOO_LOW")
+    self.assertTrue(message[0] == "To: a.b@c.com")
+    self.assertTrue(message[1] == "Hi, the temperature is too low")
+
 
   def test_send_to_controller(self):
     self.assertTrue(typewise_alert.send_to_controller('TOO_LOW') == "0xfeed, TOO_LOW")
 
   def test_send_to_email(self):
+    recepient_value, message = typewise_alert.send_to_email('TOO_LOW')
+    self.assertTrue(recepient_value == "To: a.b@c.com")
+    self.assertTrue(message == "Hi, the temperature is too low")
+
     recepient_value, message = typewise_alert.send_to_email('TOO_HIGH')
     self.assertTrue(recepient_value == "To: a.b@c.com")
     self.assertTrue(message == "Hi, the temperature is too high")
     
-    recepient_value, message = typewise_alert.send_to_email('TOO_LOW')
-    self.assertTrue(message == "Hi, the temperature is too low")
+    
 
 if __name__ == '__main__':
   unittest.main()
